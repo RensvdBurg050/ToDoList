@@ -1,56 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useTodos } from "./TodoContext";
 
-type Todo = {
-  id: number;
-  text: string;
-  completed: boolean;
-};
-
-export default function Home() {
-
-  // State voor takenlijst en nieuwe taak
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [newTask, setNewTask] = useState<string>("");
-
-  // Taken laden
-  useEffect(() => {
-    const storedTodos = localStorage.getItem("todos");
-    if (storedTodos) {
-      setTodos(JSON.parse(storedTodos));
-    }
-  }, []);
-
-  // Taken opslaan bij elke verandering
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
-
-  // Taak toevoegen
-  const addTask = () => {
-    if (!newTask.trim()) return; // voorkomt lege taken
-    const newTodo: Todo = {
-      id: Date.now(),
-      text: newTask,
-      completed: false,
-    };
-    setTodos([...todos, newTodo]);
-    setNewTask("");
-  };
-
-  // Taak afvinken
-  const toggleTask = (id: number) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  };
-
-  // Taak verwijderen
-  const deleteTask = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
+export default function HomePage() {
+  const { todos, addTask, toggleTask, deleteTask } = useTodos();
+  const [newTask, setNewTask] = useState("");
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-gray-100 p-6">
@@ -66,7 +20,7 @@ export default function Home() {
           className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <button
-          onClick={addTask}
+          onClick={() => { addTask(newTask); setNewTask(""); }}
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
         >
           Toevoegen
@@ -101,7 +55,6 @@ export default function Home() {
             </button>
           </li>
         ))}
-        {/* Bericht als er geen taken zijn */}
         {todos.length === 0 && (
           <li className="px-4 py-3 text-gray-500 text-center">
             Geen taken, voeg er een toe!
@@ -109,7 +62,5 @@ export default function Home() {
         )}
       </ul>
     </div>
-
-
   );
 }
